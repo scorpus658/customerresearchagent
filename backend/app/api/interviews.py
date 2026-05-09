@@ -196,6 +196,7 @@ async def upload_interview(
     participant_name: str | None = Form(default=None),
     participant_age_range: str | None = Form(default=None),
     participant_role: str | None = Form(default=None),
+    synthesis_model: str = Form(default='haiku'),
     session: AsyncSession = Depends(get_session),
 ) -> InterviewOut:
     """Upload a transcript, audio, or video file for analysis."""
@@ -278,7 +279,7 @@ async def upload_interview(
     # Queue background processing
     try:
         pool = await get_arq_pool()
-        await pool.enqueue_job("process_interview", str(interview.id))
+        await pool.enqueue_job("process_interview", str(interview.id), synthesis_model)
         logger.info("Enqueued processing job for interview %s", interview.id)
     except Exception as exc:
         logger.error("Failed to enqueue job for interview %s: %s", interview.id, exc)
@@ -538,9 +539,14 @@ async def delete_interview(
     await session.delete(interview)
 
 
+class ReprocessBody(BaseModel):
+    synthesis_model: str = "haiku"
+
+
 @router.post("/{interview_id}/reprocess", response_model=InterviewOut)
 async def reprocess_interview(
     interview_id: uuid.UUID,
+    body: ReprocessBody = ReprocessBody(),
     session: AsyncSession = Depends(get_session),
 ) -> InterviewOut:
     """Rerun the analysis pipeline for an interview."""
@@ -576,7 +582,7 @@ async def reprocess_interview(
     # Re-queue
     try:
         pool = await get_arq_pool()
-        await pool.enqueue_job("process_interview", str(interview.id))
+        await pool.enqueue_job("process_interview", str(interview.id), body.synthesis_model)
         logger.info("Re-enqueued processing for interview %s", interview.id)
     except Exception as exc:
         logger.error("Failed to re-enqueue interview %s: %s", interview.id, exc)

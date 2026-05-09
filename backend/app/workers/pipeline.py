@@ -45,7 +45,7 @@ async def get_arq_pool() -> ArqRedis:
     return await create_pool(_parse_redis_url(settings.REDIS_URL))
 
 
-async def process_interview(ctx: dict[str, Any], interview_id: str) -> None:
+async def process_interview(ctx: dict[str, Any], interview_id: str, synthesis_model: str = "haiku") -> None:
     """
     Main pipeline orchestrator.
 
@@ -177,7 +177,7 @@ async def process_interview(ctx: dict[str, Any], interview_id: str) -> None:
                 "language_detected": interview.language_detected,
             }
             report_data = await synthesis_svc.synthesize_report(
-                interview_dict, transcript_data, analysis_data
+                interview_dict, transcript_data, analysis_data, synthesis_model
             )
 
             if existing_report:

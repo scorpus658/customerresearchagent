@@ -54,6 +54,7 @@ class SynthesisService:
         interview: dict[str, Any],
         transcript: dict[str, Any],
         analysis: dict[str, Any],
+        synthesis_model: str = "haiku",
     ) -> dict[str, Any]:
         """
         Produce a final synthesised report.
@@ -71,9 +72,13 @@ class SynthesisService:
 
         logger.info("Synthesising report for interview %s", interview.get("id", "unknown"))
 
+        model_id = (
+            "claude-sonnet-4-6" if synthesis_model == "sonnet"
+            else "claude-haiku-4-5-20251001"
+        )
         response = await self._client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=8192,
+            model=model_id,
+            max_tokens=16000,
             messages=[
                 {"role": "user", "content": context},
             ],

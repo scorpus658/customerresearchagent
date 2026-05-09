@@ -51,6 +51,7 @@ export async function uploadInterview(
   if (participantName) form.append('participant_name', participantName)
   if (participantAgeRange) form.append('participant_age_range', participantAgeRange)
   if (participantRole) form.append('participant_role', participantRole)
+  form.append('synthesis_model', localStorage.getItem('synthesis_model') ?? 'haiku')
   const { data } = await api.post<Interview>('/interviews/upload', form, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: (e) => {
@@ -96,7 +97,8 @@ export async function deleteInterview(id: string): Promise<void> {
 }
 
 export async function reprocessInterview(id: string): Promise<Interview> {
-  const { data } = await api.post<Interview>(`/interviews/${id}/reprocess`)
+  const model = localStorage.getItem('synthesis_model') ?? 'haiku'
+  const { data } = await api.post<Interview>(`/interviews/${id}/reprocess`, { synthesis_model: model })
   return data
 }
 
