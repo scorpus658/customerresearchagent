@@ -8,13 +8,27 @@ interface ReportEditorProps {
   saving?: boolean
 }
 
+// If executive_summary was accidentally stored as a full JSON blob, extract the real text
+function extractSummary(raw: string | null): string {
+  if (!raw) return ''
+  const trimmed = raw.trim()
+  if (!trimmed.startsWith('{')) return trimmed
+  try {
+    const parsed = JSON.parse(trimmed)
+    return parsed.executive_summary ?? trimmed
+  } catch {
+    return trimmed
+  }
+}
+
 export default function ReportEditor({ report, onSave, saving }: ReportEditorProps) {
   const [editingSummary, setEditingSummary] = useState(false)
   const [summaryDraft, setSummaryDraft] = useState('')
+  const executiveSummary = extractSummary(report.executive_summary)
 
   const startEditSummary = () => {
     setEditingSummary(true)
-    setSummaryDraft(report.executive_summary ?? '')
+    setSummaryDraft(executiveSummary)
   }
 
   const saveSummary = () => {
@@ -74,7 +88,7 @@ export default function ReportEditor({ report, onSave, saving }: ReportEditorPro
             </div>
           ) : (
             <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-              {report.executive_summary || (
+              {executiveSummary || (
                 <span className="text-gray-400 italic">No summary yet.</span>
               )}
             </div>
