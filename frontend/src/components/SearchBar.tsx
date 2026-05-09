@@ -13,7 +13,7 @@ export default function SearchBar({
   debounceMs = 300,
 }: SearchBarProps) {
   const [value, setValue] = useState('')
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => {
     clearTimeout(timeoutRef.current)
