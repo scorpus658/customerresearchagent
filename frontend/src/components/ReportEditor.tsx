@@ -95,10 +95,10 @@ export default function ReportEditor({ report, onSave, saving }: ReportEditorPro
               return (
                 <div key={theme} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
                   <h4 className="text-sm font-medium text-gray-900 mb-1">{theme}</h4>
-                  {finding.description && (
+                  {!!finding.description && (
                     <p className="text-sm text-gray-600 mb-2">{String(finding.description)}</p>
                   )}
-                  {finding.implications && (
+                  {!!finding.implications && (
                     <p className="text-xs text-gray-500 italic">Implications: {String(finding.implications)}</p>
                   )}
                 </div>
