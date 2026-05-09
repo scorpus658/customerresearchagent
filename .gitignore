@@ -33,5 +33,8 @@ backend/uploads/
 .idea/
 .vscode/
 
+# SSH keys — never commit
+*.pem
+
 # Docker
 *.log
