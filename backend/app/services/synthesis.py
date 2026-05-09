@@ -47,7 +47,7 @@ class SynthesisService:
     """Generate a comprehensive report from interview analysis using Claude."""
 
     def __init__(self) -> None:
-        self._client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+        self._client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
 
     async def synthesize_report(
         self,
@@ -71,7 +71,7 @@ class SynthesisService:
 
         logger.info("Synthesising report for interview %s", interview.get("id", "unknown"))
 
-        response = self._client.messages.create(
+        response = await self._client.messages.create(
             model="claude-haiku-4-5-20251001",
             max_tokens=8192,
             messages=[
