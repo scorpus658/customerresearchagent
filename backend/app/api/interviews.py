@@ -291,7 +291,7 @@ async def upload_interview(
 
 @router.get("", response_model=PaginatedInterviews)
 async def list_interviews(
-    limit: int = Query(default=20, ge=1, le=100),
+    limit: int = Query(default=20, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
     project_id: str | None = Query(default=None),
     session: AsyncSession = Depends(get_session),
