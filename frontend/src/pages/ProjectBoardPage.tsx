@@ -13,7 +13,7 @@ import {
   Loader2,
   Clock,
 } from 'lucide-react'
-import { useProject, useBoard, useSynthesizeBoard } from '../hooks/useInterviews'
+import { useProject, useBoard, useSynthesizeBoard, useInterviews } from '../hooks/useInterviews'
 import type { BoardTheme, BoardPainPoint, BoardInsight, BoardPattern, BoardDataGap } from '../types'
 
 const STRENGTH_COLOR = {
@@ -85,6 +85,13 @@ export default function ProjectBoardPage() {
   const { data: project } = useProject(id!)
   const { data: board, isLoading } = useBoard(id!)
   const synthesize = useSynthesizeBoard(id!)
+  const { data: interviewsData } = useInterviews(200, 0, id!)
+
+  // Build title → id map so board references can link to transcripts
+  const titleToId = (interviewsData?.items ?? []).reduce<Record<string, string>>(
+    (acc, iv) => { acc[iv.title] = iv.id; return acc },
+    {}
+  )
 
   const isRunning = board?.status === 'running' || synthesize.isPending
   const hasData = board?.status === 'complete'
@@ -221,7 +228,7 @@ export default function ProjectBoardPage() {
                 <Section icon={TrendingUp} title="Recurring Themes" iconColor="text-indigo-400">
                   <div className="space-y-3">
                     {board.recurring_themes!.map((theme, i) => (
-                      <ThemeRow key={i} theme={theme} total={board.interviews_included?.length ?? 1} />
+                      <ThemeRow key={i} theme={theme} total={board.interviews_included?.length ?? 1} titleToId={titleToId} />
                     ))}
                   </div>
                 </Section>
@@ -232,7 +239,7 @@ export default function ProjectBoardPage() {
                 <Section icon={AlertTriangle} title="Top Pain Points" iconColor="text-red-400">
                   <div className="space-y-3">
                     {board.pain_points!.map((pp, i) => (
-                      <PainPointRow key={i} pp={pp} total={board.interviews_included?.length ?? 1} />
+                      <PainPointRow key={i} pp={pp} total={board.interviews_included?.length ?? 1} titleToId={titleToId} />
                     ))}
                   </div>
                 </Section>
@@ -256,7 +263,7 @@ export default function ProjectBoardPage() {
                 <Section icon={Lightbulb} title="Unique Insights" iconColor="text-amber-400">
                   <div className="space-y-3">
                     {board.unique_insights!.map((ins, i) => (
-                      <UniqueInsightCard key={i} insight={ins} />
+                      <UniqueInsightCard key={i} insight={ins} titleToId={titleToId} />
                     ))}
                   </div>
                 </Section>
@@ -328,7 +335,8 @@ function Section({
   )
 }
 
-function ThemeRow({ theme, total }: { theme: BoardTheme; total: number }) {
+function ThemeRow({ theme, total, titleToId }: { theme: BoardTheme; total: number; titleToId: Record<string, string> }) {
+  const navigate = useNavigate()
   const pct = Math.round((theme.count / total) * 100)
   return (
     <div>
@@ -345,11 +353,30 @@ function ThemeRow({ theme, total }: { theme: BoardTheme; total: number }) {
       {theme.description && (
         <p className="text-xs text-gray-500 mt-1">{theme.description}</p>
       )}
+      {theme.interviews?.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {theme.interviews.map((title) => {
+            const ivId = titleToId[title]
+            return ivId ? (
+              <button
+                key={title}
+                onClick={() => navigate(`/interviews/${ivId}`)}
+                className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-gray-400 hover:bg-indigo-500/30 hover:text-indigo-300 transition-colors"
+              >
+                {title}
+              </button>
+            ) : (
+              <span key={title} className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-gray-500">{title}</span>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
 
-function PainPointRow({ pp, total }: { pp: BoardPainPoint; total: number }) {
+function PainPointRow({ pp, total, titleToId }: { pp: BoardPainPoint; total: number; titleToId: Record<string, string> }) {
+  const navigate = useNavigate()
   const pct = Math.round((pp.count / total) * 100)
   return (
     <div>
@@ -362,6 +389,24 @@ function PainPointRow({ pp, total }: { pp: BoardPainPoint; total: number }) {
       </div>
       {pp.quotes?.[0] && (
         <p className="text-xs text-gray-500 italic mt-1 line-clamp-2">"{pp.quotes[0]}"</p>
+      )}
+      {pp.interviews?.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {pp.interviews.map((title) => {
+            const ivId = titleToId[title]
+            return ivId ? (
+              <button
+                key={title}
+                onClick={() => navigate(`/interviews/${ivId}`)}
+                className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-gray-400 hover:bg-red-500/30 hover:text-red-300 transition-colors"
+              >
+                {title}
+              </button>
+            ) : (
+              <span key={title} className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-gray-500">{title}</span>
+            )
+          })}
+        </div>
       )}
     </div>
   )
@@ -385,7 +430,9 @@ function PatternCard({ pattern }: { pattern: BoardPattern }) {
   )
 }
 
-function UniqueInsightCard({ insight }: { insight: BoardInsight }) {
+function UniqueInsightCard({ insight, titleToId }: { insight: BoardInsight; titleToId: Record<string, string> }) {
+  const navigate = useNavigate()
+  const ivId = titleToId[insight.interview]
   return (
     <div className="border border-amber-500/20 bg-amber-500/5 rounded-lg p-4">
       <p className="text-sm text-gray-200 mb-2">{insight.text}</p>
@@ -393,7 +440,16 @@ function UniqueInsightCard({ insight }: { insight: BoardInsight }) {
         <p className="text-xs text-amber-400/70 italic mb-2">"{insight.quote}"</p>
       )}
       <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-600">{insight.interview}</span>
+        {ivId ? (
+          <button
+            onClick={() => navigate(`/interviews/${ivId}`)}
+            className="text-xs text-amber-500/70 hover:text-amber-400 underline underline-offset-2 transition-colors"
+          >
+            {insight.interview}
+          </button>
+        ) : (
+          <span className="text-xs text-gray-600">{insight.interview}</span>
+        )}
         {insight.why_notable && (
           <span className="text-xs text-amber-500/60 ml-2 text-right">{insight.why_notable}</span>
         )}
