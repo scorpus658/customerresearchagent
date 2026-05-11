@@ -67,8 +67,8 @@ export default function ProfilePromptModal({ profile, onSave, onDismiss }: Props
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-4 sm:pb-0">
-      {/* Backdrop — not dismissible, demographics are required */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onDismiss} />
 
       <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
@@ -127,7 +127,13 @@ export default function ProfilePromptModal({ profile, onSave, onDismiss }: Props
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end">
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+          <button
+            onClick={onDismiss}
+            className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            Skip for now
+          </button>
           <button
             onClick={handleSave}
             disabled={saving}
