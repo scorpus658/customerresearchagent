@@ -125,12 +125,13 @@ export interface IntervieweeProfile {
   interview_id: string
   name: string | null
   age_range: string | null
+  gender: string | null
   role: string | null
-
   industry: string | null
+  location: string | null
+  income_range: string | null
   tech_level: string | null
   financial_context: string | null
-  location: string | null
   notes: string | null
   missing_fields: string[]
   user_filled: 'no' | 'partial' | 'done'

@@ -353,6 +353,41 @@ export default function InterviewDetailPage() {
               <MetadataItem icon={Clock} label="Created" value={formatDate(interview.created_at)} />
             </div>
           </div>
+
+          {profileQuery.data && interview.status === 'complete' && (
+            <div className="border border-gray-200 rounded-lg bg-white p-5">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Participant Demographics</h3>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: profileQuery.data.name },
+                  { label: profileQuery.data.age_range },
+                  { label: profileQuery.data.gender },
+                  { label: profileQuery.data.role },
+                  { label: profileQuery.data.industry },
+                  { label: profileQuery.data.location },
+                  { label: profileQuery.data.income_range },
+                  { label: profileQuery.data.tech_level },
+                ].filter(t => t.label).map((tag, i) => (
+                  <span
+                    key={i}
+                    className="px-2.5 py-1 text-xs rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 font-medium"
+                  >
+                    {tag.label}
+                  </span>
+                ))}
+                {profileQuery.data.financial_context && (
+                  <span className="px-2.5 py-1 text-xs rounded-full bg-amber-50 border border-amber-100 text-amber-700 font-medium max-w-xs truncate">
+                    💰 {profileQuery.data.financial_context}
+                  </span>
+                )}
+                {profileQuery.data.missing_fields?.length > 0 && (
+                  <span className="px-2.5 py-1 text-xs rounded-full bg-gray-50 border border-gray-200 text-gray-400">
+                    {profileQuery.data.missing_fields.length} field{profileQuery.data.missing_fields.length > 1 ? 's' : ''} missing
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

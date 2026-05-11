@@ -13,9 +13,21 @@ const FIELD_META: Record<
     type: 'select',
     options: ['Under 25', '25-34', '35-44', '45-54', '55+'],
   },
+  gender: {
+    label: 'Gender',
+    placeholder: '',
+    type: 'select',
+    options: ['Male', 'Female', 'Non-binary', 'Prefer not to say'],
+  },
   role: { label: 'Job title / role', placeholder: 'e.g. Product Manager', type: 'text' },
-
   industry: { label: 'Industry', placeholder: 'e.g. SaaS, Healthcare, E-commerce', type: 'text' },
+  location: { label: 'Location / region', placeholder: 'e.g. Bangalore, India', type: 'text' },
+  income_range: {
+    label: 'Annual income range',
+    placeholder: '',
+    type: 'select',
+    options: ['Under ₹3L', '₹3-5L', '₹5-10L', '₹10-20L', '₹20-50L', '₹50L+', 'Under $30k', '$30-60k', '$60-100k', '$100-200k', '$200k+'],
+  },
   tech_level: {
     label: 'Technical expertise',
     placeholder: '',
@@ -27,7 +39,6 @@ const FIELD_META: Record<
     placeholder: 'Any mentions of budget, pricing, spending constraints…',
     type: 'text',
   },
-  location: { label: 'Location / region', placeholder: 'e.g. Bangalore, India', type: 'text' },
 }
 
 interface Props {
@@ -56,8 +67,8 @@ export default function ProfilePromptModal({ profile, onSave, onDismiss }: Props
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-4 sm:pb-0">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onDismiss} />
+      {/* Backdrop — not dismissible, demographics are required */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
 
       <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
@@ -116,13 +127,7 @@ export default function ProfilePromptModal({ profile, onSave, onDismiss }: Props
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-          <button
-            onClick={onDismiss}
-            className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            Skip for now
-          </button>
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end">
           <button
             onClick={handleSave}
             disabled={saving}

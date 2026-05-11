@@ -26,6 +26,12 @@ async def _run_migrations() -> None:
             "ALTER TABLE interviews ADD COLUMN IF NOT EXISTS "
             "project_id UUID REFERENCES projects(id) ON DELETE SET NULL"
         ))
+        await conn.execute(text(
+            "ALTER TABLE interviewee_profiles ADD COLUMN IF NOT EXISTS gender VARCHAR(64)"
+        ))
+        await conn.execute(text(
+            "ALTER TABLE interviewee_profiles ADD COLUMN IF NOT EXISTS income_range VARCHAR(64)"
+        ))
     logger.info("Migrations applied")
 
 

@@ -13,27 +13,29 @@ logger = logging.getLogger(__name__)
 PROFILE_FIELDS = [
     "name",
     "age_range",
+    "gender",
     "role",
-
     "industry",
+    "location",
+    "income_range",
     "tech_level",
     "financial_context",
-    "location",
 ]
 
 FIELD_LABELS = {
     "name": "Name or pseudonym",
-    "age_range": "Age range (e.g. 26-35, 36-45)",
+    "age_range": "Age range",
+    "gender": "Gender",
     "role": "Job title / role",
-
     "industry": "Industry or sector",
-    "tech_level": "Technical expertise (non-technical, somewhat-technical, technical, very-technical)",
-    "financial_context": "Any mentions of budget, pricing, spending, or financial constraints (direct quotes preferred)",
     "location": "Location or region",
+    "income_range": "Annual income range",
+    "tech_level": "Technical expertise",
+    "financial_context": "Budget / financial context (direct quotes preferred)",
 }
 
 EXTRACT_PROMPT = """\
-You are extracting a structured profile of the interview participant from a transcript.
+You are extracting a structured demographic profile of the interview participant from a transcript.
 
 Extract ONLY what is clearly stated or strongly implied. Do NOT infer or guess.
 If a field cannot be determined from the transcript, return null for that field.
@@ -42,12 +44,13 @@ Return valid JSON with exactly these keys:
 {
   "name": string | null,
   "age_range": string | null,          // e.g. "26-35", "46-55"
+  "gender": string | null,             // e.g. "Male", "Female", "Non-binary" — only if stated
   "role": string | null,               // job title as stated
-
   "industry": string | null,
+  "location": string | null,
+  "income_range": string | null,       // e.g. "₹5-10L/yr", "$50k-$100k/yr" — only if stated
   "tech_level": string | null,         // "non-technical" | "somewhat-technical" | "technical" | "very-technical"
   "financial_context": string | null,  // relevant quotes about budget/spend/pricing
-  "location": string | null,
   "notes": string | null               // any other useful context about this person
 }
 

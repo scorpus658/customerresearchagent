@@ -198,6 +198,8 @@ class IntervieweeProfile(Base):
     tech_level = Column(String(64), nullable=True)      # "non-technical" … "very-technical"
     financial_context = Column(Text, nullable=True)     # direct quotes about budget/spend
     location = Column(String(256), nullable=True)
+    gender = Column(String(64), nullable=True)          # e.g. "Male", "Female", "Non-binary"
+    income_range = Column(String(64), nullable=True)    # e.g. "₹5-10L", "$50k-$100k"
     notes = Column(Text, nullable=True)
     # Which fields the extractor couldn't determine from the transcript
     missing_fields = Column(JSON, nullable=True)        # list[str]
