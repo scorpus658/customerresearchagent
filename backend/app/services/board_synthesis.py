@@ -23,23 +23,34 @@ Return valid JSON with exactly these keys:
       "name": "Theme name",
       "description": "1-2 sentence summary",
       "count": <number of interviews mentioning this>,
-      "interviews": ["interview title 1", ...],
-      "strength": "strong" | "moderate" | "weak"
+      "strength": "strong" | "moderate" | "weak",
+      "interviews": [
+        {
+          "title": "exact interview title",
+          "insight": "the specific insight text from this interview that supports the theme",
+          "quote": "the exact verbatim quote from the transcript that evidences this"
+        }
+      ]
     }
   ],
   "pain_points": [
     {
       "text": "Pain point description",
       "count": <frequency across interviews>,
-      "interviews": ["interview title", ...],
-      "quotes": ["direct quote 1", ...]
+      "interviews": [
+        {
+          "title": "exact interview title",
+          "insight": "the specific pain point insight from this interview",
+          "quote": "the exact verbatim quote that captures this pain"
+        }
+      ]
     }
   ],
   "unique_insights": [
     {
       "text": "Insight that only appeared once but is worth noting",
-      "interview": "interview title",
-      "quote": "supporting quote",
+      "interview": "exact interview title",
+      "quote": "supporting verbatim quote",
       "why_notable": "brief reason this stands out"
     }
   ],
@@ -55,7 +66,6 @@ Return valid JSON with exactly these keys:
     "age_ranges": {"26-35": 2, "36-45": 1},
     "roles": ["PM", "Founder", ...],
     "industries": ["SaaS", "E-commerce", ...],
-
     "tech_levels": {"technical": 2, "non-technical": 1},
     "locations": ["India", "US", ...]
   },
@@ -70,6 +80,7 @@ Return valid JSON with exactly these keys:
 
 Be rigorous. Only report patterns that have genuine evidence across multiple interviews.
 Flag single-interview observations as unique_insights, not patterns.
+For every interview entry in recurring_themes and pain_points, include the most relevant verbatim quote — do not paraphrase.
 Return ONLY the JSON, no explanation.
 """
 

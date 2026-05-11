@@ -14,7 +14,7 @@ import {
   Clock,
 } from 'lucide-react'
 import { useProject, useBoard, useSynthesizeBoard, useInterviews } from '../hooks/useInterviews'
-import type { BoardTheme, BoardPainPoint, BoardInsight, BoardPattern, BoardDataGap } from '../types'
+import type { BoardTheme, BoardPainPoint, BoardInsight, BoardPattern, BoardDataGap, BoardEvidence } from '../types'
 
 const STRENGTH_COLOR = {
   strong: 'bg-red-500',
@@ -335,14 +335,58 @@ function Section({
   )
 }
 
-function ThemeRow({ theme, total, titleToId }: { theme: BoardTheme; total: number; titleToId: Record<string, string> }) {
+function EvidenceDrawer({ evidence, titleToId, accentClass }: {
+  evidence: BoardEvidence[]
+  titleToId: Record<string, string>
+  accentClass: string
+}) {
   const navigate = useNavigate()
+  return (
+    <div className="mt-3 space-y-3 border-t border-white/10 pt-3">
+      {evidence.map((ev, i) => {
+        const ivId = titleToId[ev.title]
+        return (
+          <div key={i} className="bg-white/5 rounded-lg p-3 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-gray-300 truncate">{ev.title}</span>
+              {ivId && (
+                <button
+                  onClick={() => navigate(`/interviews/${ivId}`)}
+                  className={`text-[10px] px-2 py-0.5 rounded-full border ${accentClass} flex-shrink-0 ml-2 transition-colors`}
+                >
+                  View transcript →
+                </button>
+              )}
+            </div>
+            {ev.insight && (
+              <p className="text-xs text-gray-400 leading-relaxed">{ev.insight}</p>
+            )}
+            {ev.quote && (
+              <blockquote className="border-l-2 border-white/20 pl-2 text-xs text-gray-500 italic">
+                "{ev.quote}"
+              </blockquote>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function ThemeRow({ theme, total, titleToId }: { theme: BoardTheme; total: number; titleToId: Record<string, string> }) {
+  const [expanded, setExpanded] = useState(false)
   const pct = Math.round((theme.count / total) * 100)
+  const hasEvidence = theme.interviews?.length > 0
   return (
     <div>
-      <div className="flex items-center justify-between mb-1">
+      <div
+        className={`flex items-center justify-between mb-1 ${hasEvidence ? 'cursor-pointer' : ''}`}
+        onClick={() => hasEvidence && setExpanded((e) => !e)}
+      >
         <span className="text-sm text-gray-200">{theme.name}</span>
-        <span className="text-xs text-gray-500">{theme.count}/{total}</span>
+        <span className={`text-xs ml-3 flex-shrink-0 ${hasEvidence ? 'text-indigo-400 hover:text-indigo-300' : 'text-gray-500'}`}>
+          {theme.count}/{total}{hasEvidence ? (expanded ? ' ▲' : ' ▼') : ''}
+        </span>
       </div>
       <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
         <div
@@ -353,60 +397,41 @@ function ThemeRow({ theme, total, titleToId }: { theme: BoardTheme; total: numbe
       {theme.description && (
         <p className="text-xs text-gray-500 mt-1">{theme.description}</p>
       )}
-      {theme.interviews?.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {theme.interviews.map((title) => {
-            const ivId = titleToId[title]
-            return ivId ? (
-              <button
-                key={title}
-                onClick={() => navigate(`/interviews/${ivId}`)}
-                className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-gray-400 hover:bg-indigo-500/30 hover:text-indigo-300 transition-colors"
-              >
-                {title}
-              </button>
-            ) : (
-              <span key={title} className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-gray-500">{title}</span>
-            )
-          })}
-        </div>
+      {expanded && hasEvidence && (
+        <EvidenceDrawer
+          evidence={theme.interviews}
+          titleToId={titleToId}
+          accentClass="border-indigo-500/40 text-indigo-400 hover:bg-indigo-500/20"
+        />
       )}
     </div>
   )
 }
 
 function PainPointRow({ pp, total, titleToId }: { pp: BoardPainPoint; total: number; titleToId: Record<string, string> }) {
-  const navigate = useNavigate()
+  const [expanded, setExpanded] = useState(false)
   const pct = Math.round((pp.count / total) * 100)
+  const hasEvidence = pp.interviews?.length > 0
   return (
     <div>
-      <div className="flex items-center justify-between mb-1">
+      <div
+        className={`flex items-center justify-between mb-1 ${hasEvidence ? 'cursor-pointer' : ''}`}
+        onClick={() => hasEvidence && setExpanded((e) => !e)}
+      >
         <span className="text-sm text-gray-200 leading-snug">{pp.text}</span>
-        <span className="text-xs text-gray-500 ml-3 flex-shrink-0">{pp.count}/{total}</span>
+        <span className={`text-xs ml-3 flex-shrink-0 ${hasEvidence ? 'text-red-400 hover:text-red-300' : 'text-gray-500'}`}>
+          {pp.count}/{total}{hasEvidence ? (expanded ? ' ▲' : ' ▼') : ''}
+        </span>
       </div>
       <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
         <div className="h-full rounded-full bg-red-500" style={{ width: `${pct}%` }} />
       </div>
-      {pp.quotes?.[0] && (
-        <p className="text-xs text-gray-500 italic mt-1 line-clamp-2">"{pp.quotes[0]}"</p>
-      )}
-      {pp.interviews?.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {pp.interviews.map((title) => {
-            const ivId = titleToId[title]
-            return ivId ? (
-              <button
-                key={title}
-                onClick={() => navigate(`/interviews/${ivId}`)}
-                className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-gray-400 hover:bg-red-500/30 hover:text-red-300 transition-colors"
-              >
-                {title}
-              </button>
-            ) : (
-              <span key={title} className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-gray-500">{title}</span>
-            )
-          })}
-        </div>
+      {expanded && hasEvidence && (
+        <EvidenceDrawer
+          evidence={pp.interviews}
+          titleToId={titleToId}
+          accentClass="border-red-500/40 text-red-400 hover:bg-red-500/20"
+        />
       )}
     </div>
   )

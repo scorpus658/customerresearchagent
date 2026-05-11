@@ -137,19 +137,24 @@ export interface IntervieweeProfile {
   user_filled: 'no' | 'partial' | 'done'
 }
 
+export interface BoardEvidence {
+  title: string
+  insight: string
+  quote: string
+}
+
 export interface BoardTheme {
   name: string
   description: string
   count: number
-  interviews: string[]
+  interviews: BoardEvidence[]
   strength: 'strong' | 'moderate' | 'weak'
 }
 
 export interface BoardPainPoint {
   text: string
   count: number
-  interviews: string[]
-  quotes: string[]
+  interviews: BoardEvidence[]
 }
 
 export interface BoardInsight {
