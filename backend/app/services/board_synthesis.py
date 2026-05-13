@@ -15,6 +15,16 @@ You are a senior UX researcher synthesizing findings across multiple customer in
 
 Given a set of interviews (each with its extracted insights and participant profile), produce a structured research board.
 
+OUTPUT SIZE RULES (critical — output must fit in one response):
+- recurring_themes: max 8 themes total
+- pain_points: max 8 pain points total
+- For each theme/pain point, include at most 5 representative interviews (pick the most illustrative ones)
+- Each "insight" field: max 20 words
+- Each "quote" field: max 25 words — truncate with "…" if needed, keep the most impactful fragment
+- unique_insights: max 5 items; "why_notable" max 15 words
+- patterns: max 5 items; "evidence" max 25 words
+- data_gaps: max 4 items
+
 Return valid JSON with exactly these keys:
 
 {
@@ -27,21 +37,21 @@ Return valid JSON with exactly these keys:
       "interviews": [
         {
           "title": "exact interview title",
-          "insight": "the specific insight text from this interview that supports the theme",
-          "quote": "the exact verbatim quote from the transcript that evidences this"
+          "insight": "≤20 words: specific insight from this interview supporting the theme",
+          "quote": "≤25 words verbatim quote evidencing this (truncate with … if needed)"
         }
       ]
     }
   ],
   "pain_points": [
     {
-      "text": "Pain point description",
+      "text": "Pain point description (1 sentence)",
       "count": <frequency across interviews>,
       "interviews": [
         {
           "title": "exact interview title",
-          "insight": "the specific pain point insight from this interview",
-          "quote": "the exact verbatim quote that captures this pain"
+          "insight": "≤20 words: specific pain point insight from this interview",
+          "quote": "≤25 words verbatim quote capturing this pain (truncate with … if needed)"
         }
       ]
     }
@@ -50,37 +60,37 @@ Return valid JSON with exactly these keys:
     {
       "text": "Insight that only appeared once but is worth noting",
       "interview": "exact interview title",
-      "quote": "supporting verbatim quote",
-      "why_notable": "brief reason this stands out"
+      "quote": "≤25 words supporting verbatim quote",
+      "why_notable": "≤15 words: why this stands out"
     }
   ],
   "patterns": [
     {
       "title": "Pattern name",
-      "description": "Non-obvious correlation or pattern across interviews",
-      "evidence": "How you detected this — specific references",
+      "description": "1 sentence: non-obvious correlation across interviews",
+      "evidence": "≤25 words: how you detected this",
       "type": "behavioral" | "demographic" | "contextual" | "emotional"
     }
   ],
   "demographic_summary": {
     "age_ranges": {"26-35": 2, "36-45": 1},
-    "roles": ["PM", "Founder", ...],
-    "industries": ["SaaS", "E-commerce", ...],
+    "roles": ["PM", "Founder"],
+    "industries": ["SaaS", "E-commerce"],
     "tech_levels": {"technical": 2, "non-technical": 1},
-    "locations": ["India", "US", ...]
+    "locations": ["India", "US"]
   },
   "data_gaps": [
     {
       "question": "What question is left unanswered?",
-      "context": "Why this matters",
+      "context": "Why this matters (1 sentence)",
       "missing_in": <number of interviews where this was unclear>
     }
   ]
 }
 
-Be rigorous. Only report patterns that have genuine evidence across multiple interviews.
+Be rigorous. Only report patterns with genuine evidence across multiple interviews.
 Flag single-interview observations as unique_insights, not patterns.
-For every interview entry in recurring_themes and pain_points, include the most relevant verbatim quote — do not paraphrase.
+Strictly respect the word limits above — the entire JSON must be complete and valid.
 Return ONLY the JSON, no explanation.
 """
 
@@ -109,7 +119,7 @@ class BoardSynthesisService:
         try:
             response = await self._client.messages.create(
                 model="claude-sonnet-4-6",
-                max_tokens=16000,
+                max_tokens=32000,
                 system=BOARD_PROMPT,
                 messages=[{"role": "user", "content": context}],
             )
