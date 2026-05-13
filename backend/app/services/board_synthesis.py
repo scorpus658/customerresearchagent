@@ -117,13 +117,14 @@ class BoardSynthesisService:
         logger.info("Running board synthesis across %d interviews", len(interviews))
 
         try:
-            response = await self._client.messages.create(
+            async with self._client.messages.stream(
                 model="claude-sonnet-4-6",
                 max_tokens=32000,
                 system=BOARD_PROMPT,
                 messages=[{"role": "user", "content": context}],
-            )
-            text = response.content[0].text.strip()
+            ) as stream:
+                text = await stream.get_final_text()
+            text = text.strip()
 
             if text.startswith("```"):
                 lines = text.splitlines()
